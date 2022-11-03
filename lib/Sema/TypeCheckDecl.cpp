@@ -908,8 +908,7 @@ bool IsMoveOnlyRequest::evaluate(Evaluator &evaluator, ValueDecl *decl) const {
 
 bool IsPackageRequest::evaluate(Evaluator &evaluator, ValueDecl *decl) const {
   // For now only do this for nominal type decls.
-  if (isa<NominalTypeDecl>(decl) || isa<ValueDecl>(decl) || isa<VarDecl>(decl) ||
-          isa<FuncDecl>(decl) || isa<ImportDecl>(decl))
+  if (isa<ValueDecl>(decl) || isa<ExtensionDecl>(decl) || isa<ImportDecl>(decl))
     return decl->getAttrs().hasAttribute<PackageAccessControlAttr>();
   return false;
 }

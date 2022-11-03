@@ -742,8 +742,7 @@ SIMPLE_DECL_ATTR(_moveOnly, MoveOnly,
   131)
 
 SIMPLE_DECL_ATTR(package, PackageAccessControl,
-  OnNominalType |
-  OnFunc | OnAbstractFunction | OnExtension | OnGenericType | OnVar | OnSubscript |
+  OnNominalType | OnAbstractFunction | OnExtension | OnGenericType | OnVar | OnSubscript |
   OnImport | OnAccessor | OnEnumElement |
   AllowMultipleAttributes |  UserInaccessible |
   ABIBreakingToAdd | ABIBreakingToRemove | APIBreakingToAdd | APIBreakingToRemove,
