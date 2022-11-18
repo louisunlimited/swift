@@ -2086,10 +2086,14 @@ ImportedType ClangImporter::Implementation::importFunctionReturnType(
     OptionalityOfReturn = OTK_ImplicitlyUnwrappedOptional;
   }
 
+  clang::QualType returnType = clangDecl->getReturnType();
+  if (auto elaborated =
+          dyn_cast<clang::ElaboratedType>(returnType.getTypePtr()))
+    returnType = elaborated->desugar();
+
   // Specialized templates need to match the args/result exactly (i.e.,
   // ptr -> ptr not ptr -> Optional<ptr>).
-  if (clangDecl->getReturnType()->isPointerType() &&
-      clangDecl->getPrimaryTemplate() &&
+  if (returnType->isPointerType() && clangDecl->getPrimaryTemplate() &&
       clangDecl
           ->getPrimaryTemplate()
           ->getAsFunction()
@@ -2097,7 +2101,7 @@ ImportedType ClangImporter::Implementation::importFunctionReturnType(
           ->isTemplateTypeParmType())
     OptionalityOfReturn = OTK_None;
 
-  if (auto typedefType = dyn_cast<clang::TypedefType>(clangDecl->getReturnType().getTypePtr())) {
+  if (auto typedefType = dyn_cast<clang::TypedefType>(returnType)) {
     if (isUnavailableInSwift(typedefType->getDecl())) {
       if (auto clangEnum = findAnonymousEnumForTypedef(SwiftContext, typedefType)) {
         // If this fails, it means that we need a stronger predicate for
@@ -2112,7 +2116,7 @@ ImportedType ClangImporter::Implementation::importFunctionReturnType(
   }
 
   // Import the result type.
-  return importType(clangDecl->getReturnType(),
+  return importType(returnType,
                     (isAuditedResult ? ImportTypeKind::AuditedResult
                                      : ImportTypeKind::Result),
                     ImportDiagnosticAdder(*this, clangDecl,
@@ -2244,6 +2248,8 @@ ClangImporter::Implementation::importParameterType(
     ArrayRef<GenericTypeParamDecl *> genericParams,
     llvm::function_ref<void(Diagnostic &&)> addImportDiagnosticFn) {
   auto paramTy = param->getType();
+  if (auto elaborated = dyn_cast<clang::ElaboratedType>(paramTy))
+    paramTy = elaborated->desugar();
 
   ImportTypeKind importKind = getImportTypeKindForParam(param);
 
